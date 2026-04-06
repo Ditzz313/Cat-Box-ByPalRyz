@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Upload Foto Catbox</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:linear-gradient(135deg,#0f172a,#020617);
+  color:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.box{
+  background:#111827;
+  padding:20px;
+  border-radius:15px;
+  width:320px;
+  text-align:center;
+}
+
+img{
+  width:100%;
+  margin-top:10px;
+  border-radius:10px;
+  display:none;
+}
+
+button{
+  margin-top:10px;
+  padding:10px;
+  width:100%;
+  border:none;
+  border-radius:10px;
+  background:#22c55e;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.copy{
+  background:#3b82f6;
+}
+
+.progress{
+  margin-top:10px;
+  width:100%;
+  background:#374151;
+  border-radius:10px;
+  overflow:hidden;
+  height:10px;
+}
+
+.bar{
+  height:10px;
+  width:0%;
+  background:#22c55e;
+}
+
+#percent{
+  font-size:12px;
+  margin-top:5px;
+}
+
+#link{
+  margin-top:10px;
+  word-break:break-all;
+  font-size:13px;
+}
+</style>
+</head>
+<body>
+
+<div class="box">
+  <h2>Upload Foto</h2>
+
+  <input type="file" id="file" accept="image/*">
+
+  <!-- PREVIEW -->
+  <img id="preview">
+
+  <button onclick="upload()">Upload</button>
+
+  <!-- PROGRESS -->
+  <div class="progress">
+    <div class="bar" id="bar"></div>
+  </div>
+  <div id="percent">0%</div>
+
+  <div id="link"></div>
+  <button class="copy" onclick="copyLink()">Copy Link</button>
+</div>
+
+<script>
+let resultLink = "";
+
+// PREVIEW GAMBAR
+document.getElementById("file").addEventListener("change", function(){
+  const file = this.files[0];
+  if(file){
+    const reader = new FileReader();
+    reader.onload = function(e){
+      const img = document.getElementById("preview");
+      img.src = e.target.result;
+      img.style.display = "block";
+    }
+    reader.readAsDataURL(file);
+  }
+});
+
+function upload(){
+  const file = document.getElementById("file").files[0];
+  if(!file){
+    alert("Pilih foto dulu!");
+    return;
+  }
+
+  let formData = new FormData();
+  formData.append("reqtype","fileupload");
+  formData.append("fileToUpload", file);
+
+  let xhr = new XMLHttpRequest();
+  xhr.open("POST","https://catbox.moe/user/api.php");
+
+  // PROGRESS
+  xhr.upload.onprogress = function(e){
+    if(e.lengthComputable){
+      let percent = Math.round((e.loaded / e.total) * 100);
+      document.getElementById("bar").style.width = percent + "%";
+      document.getElementById("percent").innerText = percent + "%";
+    }
+  };
+
+  xhr.onload = function(){
+    if(xhr.status == 200){
+      resultLink = xhr.responseText;
+      document.getElementById("link").innerHTML =
+        `<a href="${resultLink}" target="_blank">${resultLink}</a>`;
+    }else{
+      document.getElementById("link").innerText = "Gagal upload!";
+    }
+  };
+
+  xhr.send(formData);
+}
+
+function copyLink(){
+  if(!resultLink){
+    alert("Belum ada link!");
+    return;
+  }
+  navigator.clipboard.writeText(resultLink);
+  alert("Link disalin!");
+}
+</script>
+
+</body>
+  </html>
