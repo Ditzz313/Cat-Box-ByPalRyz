@@ -2,163 +2,334 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Upload Foto Catbox</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PalRyz Upload</title>
 
 <style>
-body{
-  margin:0;
-  font-family:Arial;
-  background:linear-gradient(135deg,#0f172a,#020617);
-  color:white;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
+*{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif;}
+body{background:linear-gradient(135deg,#0f172a,#020617);color:white}
+
+/* LOGO */
+.logo{
+  font-weight:bold;
+  background:linear-gradient(45deg,#22c55e,#3b82f6);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
 }
+
+/* MENU */
+.menu-btn{
+  position:fixed;top:15px;left:15px;z-index:1001;
+  background:#ffffff20;border:none;padding:10px;border-radius:10px;
+}
+
+.overlay{
+  position:fixed;width:100%;height:100%;
+  background:#00000080;display:none;z-index:999;
+}
+.overlay.active{display:block;}
+
+.menu{
+  position:fixed;top:0;left:-100%;
+  width:75%;height:100%;
+  background:#020617;padding:20px;
+  transition:.3s;z-index:1000;
+}
+.menu.active{left:0;}
+
+.menu-header{
+  display:flex;justify-content:space-between;align-items:center;
+}
+
+/* ❌ kecil */
+.close-btn{
+  width:auto;
+  padding:3px 6px;
+  font-size:11px;
+  border-radius:5px;
+  background:#ef4444;
+  border:none;
+  color:white;
+}
+
+/* HISTORY */
+.history-item{
+  background:#111827;
+  padding:8px;
+  border-radius:10px;
+  margin-top:10px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.thumb{width:40px;height:40px;border-radius:6px;object-fit:cover;}
+.icon{font-size:18px;}
+
+.history-text{
+  flex:1;
+  font-size:11px;
+  word-break:break-all;
+}
+
+.del-btn{
+  background:red;
+  border:none;
+  padding:2px 5px;
+  font-size:10px;
+  border-radius:4px;
+}
+
+/* MAIN */
+.container{max-width:400px;margin:90px auto;padding:15px;}
 
 .box{
-  background:#111827;
+  background:#ffffff10;
   padding:20px;
-  border-radius:15px;
-  width:320px;
-  text-align:center;
+  border-radius:20px;
 }
 
-img{
+input{
+  margin-top:10px;
+  padding:10px;
+  width:100%;
+  border-radius:10px;
+}
+
+img,video,audio{
   width:100%;
   margin-top:10px;
-  border-radius:10px;
+  border-radius:12px;
   display:none;
 }
 
-button{
+.btn{
   margin-top:10px;
   padding:10px;
   width:100%;
   border:none;
   border-radius:10px;
-  background:#22c55e;
   color:white;
-  font-weight:bold;
-  cursor:pointer;
 }
 
-.copy{
-  background:#3b82f6;
+.upload{background:#22c55e;}
+.copy{background:#3b82f6;}
+.open{background:#22c55e;}
+
+.link-box{
+  margin-top:10px;
+  background:#00000070;
+  padding:10px;
+  border-radius:10px;
+  display:none;
+  max-height:80px;
+  overflow:auto;
 }
+
+.actions{display:flex;gap:5px;margin-top:8px;}
 
 .progress{
-  margin-top:10px;
-  width:100%;
-  background:#374151;
-  border-radius:10px;
-  overflow:hidden;
-  height:10px;
+  height:8px;background:#374151;
+  border-radius:10px;margin-top:10px;overflow:hidden;
 }
+.bar{height:100%;width:0%;background:#22c55e;}
 
-.bar{
-  height:10px;
-  width:0%;
-  background:#22c55e;
-}
-
-#percent{
-  font-size:12px;
-  margin-top:5px;
-}
-
-#link{
-  margin-top:10px;
-  word-break:break-all;
-  font-size:13px;
+#topBtn{
+  position:fixed;bottom:20px;right:20px;
+  width:45px;height:45px;border:none;
+  border-radius:50%;background:#22c55e;display:none;
 }
 </style>
 </head>
 <body>
 
-<div class="box">
-  <h2>Upload Foto</h2>
+<button class="menu-btn" onclick="toggleMenu()">☰</button>
+<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
-  <input type="file" id="file" accept="image/*">
-
-  <!-- PREVIEW -->
-  <img id="preview">
-
-  <button onclick="upload()">Upload</button>
-
-  <!-- PROGRESS -->
-  <div class="progress">
-    <div class="bar" id="bar"></div>
+<div class="menu" id="menu">
+  <div class="menu-header">
+    <div class="logo">⚡ PalRyz</div>
+    <button class="close-btn" onclick="toggleMenu()">✖</button>
   </div>
-  <div id="percent">0%</div>
 
-  <div id="link"></div>
-  <button class="copy" onclick="copyLink()">Copy Link</button>
+  <button class="btn" style="background:#25D366" onclick="openWA()">📲 WhatsApp</button>
+  <button class="btn" style="background:red" onclick="clearHistory()">🗑️ Hapus</button>
+
+  <h4>Riwayat</h4>
+  <div id="history"></div>
 </div>
 
+<div class="container">
+  <div class="box">
+
+    <div class="logo" style="text-align:center;font-size:22px;">⚡ PalRyz</div>
+
+    <input type="file" id="file" accept="image/*,video/*,audio/*">
+
+    <img id="imgPreview">
+    <video id="videoPreview" controls></video>
+    <audio id="audioPreview" controls></audio>
+
+    <button class="btn upload" onclick="upload()">Upload</button>
+
+    <div class="progress"><div class="bar" id="bar"></div></div>
+
+    <div class="link-box" id="linkBox">
+      <div id="linkText"></div>
+      <div class="actions">
+        <button class="btn copy" onclick="copyLink()">Copy</button>
+        <button class="btn open" onclick="openLink()">Open</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<button id="topBtn" onclick="scrollTop()">⬆️</button>
+
 <script>
-let resultLink = "";
+let resultLink="";
+let fileType="";
 
-// PREVIEW GAMBAR
-document.getElementById("file").addEventListener("change", function(){
-  const file = this.files[0];
-  if(file){
-    const reader = new FileReader();
-    reader.onload = function(e){
-      const img = document.getElementById("preview");
-      img.src = e.target.result;
-      img.style.display = "block";
-    }
-    reader.readAsDataURL(file);
+// PREVIEW
+file.onchange=()=>{
+  let f=file.files[0];
+  fileType=f.type;
+
+  imgPreview.style.display="none";
+  videoPreview.style.display="none";
+  audioPreview.style.display="none";
+
+  let url=URL.createObjectURL(f);
+
+  if(fileType.startsWith("image")){
+    imgPreview.src=url; imgPreview.style.display="block";
+  }else if(fileType.startsWith("video")){
+    videoPreview.src=url; videoPreview.style.display="block";
+  }else{
+    audioPreview.src=url; audioPreview.style.display="block";
   }
-});
-
-function upload(){
-  const file = document.getElementById("file").files[0];
-  if(!file){
-    alert("Pilih foto dulu!");
-    return;
-  }
-
-  let formData = new FormData();
-  formData.append("reqtype","fileupload");
-  formData.append("fileToUpload", file);
-
-  let xhr = new XMLHttpRequest();
-  xhr.open("POST","https://catbox.moe/user/api.php");
-
-  // PROGRESS
-  xhr.upload.onprogress = function(e){
-    if(e.lengthComputable){
-      let percent = Math.round((e.loaded / e.total) * 100);
-      document.getElementById("bar").style.width = percent + "%";
-      document.getElementById("percent").innerText = percent + "%";
-    }
-  };
-
-  xhr.onload = function(){
-    if(xhr.status == 200){
-      resultLink = xhr.responseText;
-      document.getElementById("link").innerHTML =
-        `<a href="${resultLink}" target="_blank">${resultLink}</a>`;
-    }else{
-      document.getElementById("link").innerText = "Gagal upload!";
-    }
-  };
-
-  xhr.send(formData);
 }
 
+// MENU
+function toggleMenu(){
+  menu.classList.toggle("active");
+  overlay.classList.toggle("active");
+}
+
+// COPY FIX
 function copyLink(){
-  if(!resultLink){
-    alert("Belum ada link!");
-    return;
+  if(!resultLink){alert("Belum ada link!");return;}
+
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(resultLink)
+    .then(()=>alert("Link disalin!"))
+    .catch(()=>fallbackCopy(resultLink));
+  }else{
+    fallbackCopy(resultLink);
   }
-  navigator.clipboard.writeText(resultLink);
+}
+
+function fallbackCopy(text){
+  let t=document.createElement("textarea");
+  t.value=text;
+  document.body.appendChild(t);
+  t.select();
+  document.execCommand("copy");
+  document.body.removeChild(t);
   alert("Link disalin!");
 }
+
+// UPLOAD
+async function upload(){
+  let f=file.files[0];
+  if(!f)return alert("Pilih file!");
+
+  let p=0;
+  let anim=setInterval(()=>{if(p<90){p+=5;bar.style.width=p+"%";}},200);
+
+  if(fileType.startsWith("image")){
+    let fd=new FormData();
+    fd.append("image",f);
+
+    let res=await fetch("https://api.imgbb.com/1/upload?key=7a714f9956345ffabf6cadaa47e62ff3",{
+      method:"POST",body:fd
+    });
+
+    let data=await res.json();
+    resultLink=data.data.url;
+  }else{
+    resultLink=URL.createObjectURL(f);
+  }
+
+  clearInterval(anim);
+  bar.style.width="100%";
+
+  linkText.innerText=resultLink;
+  linkBox.style.display="block";
+
+  // 🔥 NO 2 AUTO COPY
+  copyLink();
+
+  saveHistory(resultLink,fileType);
+}
+
+// OPEN
+function openLink(){window.open(resultLink,"_blank");}
+
+// HISTORY
+function saveHistory(link,type){
+  let d=JSON.parse(localStorage.getItem("history"))||[];
+  d.unshift({link,type});
+  localStorage.setItem("history",JSON.stringify(d));
+  loadHistory();
+}
+
+function loadHistory(){
+  let d=JSON.parse(localStorage.getItem("history"))||[];
+  history.innerHTML="";
+
+  d.forEach((item,i)=>{
+    let media=item.type.startsWith("image")
+      ? `<img src="${item.link}" class="thumb">`
+      : item.type.startsWith("video")
+      ? `<div class="icon">🎥</div>`
+      : `<div class="icon">🎵</div>`;
+
+    history.innerHTML+=`
+    <div class="history-item">
+      ${media}
+      <div class="history-text" onclick="openHistory('${item.link}')">${item.link}</div>
+      <button class="del-btn" onclick="deleteOne(${i})">✖</button>
+    </div>`;
+  });
+}
+loadHistory();
+
+// 🔥 NO 1 CLICK HISTORY
+function openHistory(link){
+  let pilih=confirm("OK = Buka\nCancel = Copy");
+  pilih ? window.open(link) : fallbackCopy(link);
+}
+
+// DELETE
+function deleteOne(i){
+  let d=JSON.parse(localStorage.getItem("history"))||[];
+  d.splice(i,1);
+  localStorage.setItem("history",JSON.stringify(d));
+  loadHistory();
+}
+
+function clearHistory(){
+  localStorage.removeItem("history");
+  loadHistory();
+}
+
+function openWA(){window.open("https://whatsapp.com/channel/0029Vb8P2VL35fLnrptEhd0f");}
+
+window.onscroll=()=>topBtn.style.display=scrollY>200?"block":"none";
+function scrollTop(){window.scrollTo({top:0,behavior:"smooth"});}
 </script>
 
 </body>
-  </html>
+</html>
